@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Sequence for Analysis Deliverable -->
+        <record id="seq_analysis_deliverable" model="ir.sequence">
+            <field name="name">Analysis Deliverable Sequence</field>
+            <field name="code">analysis.deliverable</field>
+            <field name="prefix">DEL-%(year)s-</field>
+            <field name="padding">4</field>
+            <field name="company_id" eval="False"/>
+        </record>
+    </data>
+</odoo>

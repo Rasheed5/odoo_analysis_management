@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_analysis_request" model="ir.actions.act_window">
+        <field name="name">Analysis Requests</field>
+        <field name="res_model">analysis.request</field>
+        <field name="view_mode">list,kanban,form,pivot,graph</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new Analysis Request
+            </p>
+            <p>
+                Manage business analysis requests, assign them to your team, define scope, and track progress until completion.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_analysis_daily_log" model="ir.actions.act_window">
+        <field name="name">Daily Logs</field>
+        <field name="res_model">analysis.daily.log</field>
+        <field name="view_mode">list,form,calendar,pivot,graph</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Submit your first Daily Log
+            </p>
+            <p>
+                Keep track of your daily planned work, actual progress, meetings, and blockers.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_analysis_meeting" model="ir.actions.act_window">
+        <field name="name">Meetings</field>
+        <field name="res_model">analysis.meeting</field>
+        <field name="view_mode">list,calendar,form,pivot,graph</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Schedule your first Analysis Meeting
+            </p>
+            <p>
+                Keep a formal record of your workshops, requirement gathering sessions, and decisions.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_analysis_action_item" model="ir.actions.act_window">
+        <field name="name">Action Items</field>
+        <field name="res_model">analysis.action.item</field>
+        <field name="view_mode">kanban,list,form,pivot,graph</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new Action Item
+            </p>
+            <p>
+                Track operational tasks, follow-ups, blockers, and escalations arising from meetings or reviews.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_analysis_requirement" model="ir.actions.act_window">
+        <field name="name">Requirements</field>
+        <field name="res_model">analysis.requirement</field>
+        <field name="view_mode">kanban,list,form,pivot,graph</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Write your first Analysis Requirement
+            </p>
+            <p>
+                Formally capture, review, and baseline business requirements, user stories, and acceptance criteria.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_analysis_deliverable" model="ir.actions.act_window">
+        <field name="name">Deliverables</field>
+        <field name="res_model">analysis.deliverable</field>
+        <field name="view_mode">kanban,list,form,pivot,graph</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Draft a new Analysis Deliverable
+            </p>
+            <p>
+                Track BRDs, SRS documents, Process Maps, and UAT scenarios securely alongside requirements.
+            </p>
+        </field>
+    </record>
+
+    <!-- Analysis Management Main Menu (Root) -->
+    <menuitem id="menu_analysis_management_root" name="Analysis" sequence="40" web_icon="analysis_management,static/description/icon.png"/>
+
+    <!-- Dashboard Sidebar Main -->
+    <menuitem id="menu_analysis_dashboard" name="Dashboard" parent="menu_analysis_management_root" action="action_analysis_management_dashboard" sequence="1"/>
+
+    <!-- Operations / Requests Menu -->
+    <menuitem id="menu_analysis_requests_main" name="Requests &amp; Logs" parent="menu_analysis_management_root" sequence="10"/>
+
+    <menuitem id="menu_analysis_requests" name="Analysis Requests" parent="menu_analysis_requests_main" action="action_analysis_request" sequence="10"/>
+    <menuitem id="menu_analysis_change_request" name="Change Requests" parent="menu_analysis_requests_main" action="action_analysis_change_request" sequence="15"/>
+    <menuitem id="menu_analysis_daily_log" name="Daily Logs" parent="menu_analysis_requests_main" action="action_analysis_daily_log" sequence="20"/>
+    <menuitem id="menu_analysis_meeting" name="Meetings" parent="menu_analysis_requests_main" action="action_analysis_meeting" sequence="30"/>
+    <menuitem id="menu_analysis_requirement" name="Requirements" parent="menu_analysis_requests_main" action="action_analysis_requirement" sequence="35"/>
+    <menuitem id="menu_analysis_deliverable" name="Deliverables" parent="menu_analysis_requests_main" action="action_analysis_deliverable" sequence="38"/>
+    <menuitem id="menu_analysis_action_item" name="Action Items" parent="menu_analysis_requests_main" action="action_analysis_action_item" sequence="40"/>
+
+    <!-- Configuration Menu -->
+    <menuitem id="menu_analysis_config" name="Configuration" parent="menu_analysis_management_root" sequence="100" groups="analysis_management.group_analysis_manager"/>
+    <menuitem id="menu_analysis_tag" name="Tags" parent="menu_analysis_config" action="action_analysis_tag" sequence="10"/>
+
+</odoo>

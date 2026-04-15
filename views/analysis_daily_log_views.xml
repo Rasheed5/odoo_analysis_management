@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- List / Tree View -->
+    <!-- Daily Log List View: Management review grid for team productivity -->
+    <record id="view_analysis_daily_log_tree" model="ir.ui.view">
+        <field name="name">analysis.daily.log.tree</field>
+        <field name="model">analysis.daily.log</field>
+        <field name="arch" type="xml">
+            <list string="Daily Logs" decoration-danger="is_late_submission==True" decoration-success="state=='reviewed'" decoration-info="state=='submitted'">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="analyst_id" widget="many2one_avatar_user"/>
+                <field name="reviewer_id" optional="show"/>
+                <field name="time_spent_hours" sum="Total Hours"/>
+                <field name="state" widget="badge" decoration-success="state == 'reviewed'" decoration-info="state == 'submitted'" decoration-muted="state == 'draft'"/>
+                <field name="has_blockers" widget="boolean_toggle" readonly="1" optional="show"/>
+                <field name="is_late_submission" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_analysis_daily_log_form" model="ir.ui.view">
+        <field name="name">analysis.daily.log.form</field>
+        <field name="model">analysis.daily.log</field>
+        <field name="arch" type="xml">
+            <form string="Daily Log">
+                <header>
+                    <button name="action_submit" string="Submit" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_mark_reviewed" string="Mark Reviewed" type="object" class="oe_highlight" invisible="state != 'submitted'" groups="analysis_management.group_analysis_reviewer,analysis_management.group_analysis_manager"/>
+                    <button name="action_reset_to_draft" string="Reset to Draft" type="object" invisible="state == 'draft'" groups="analysis_management.group_analysis_reviewer,analysis_management.group_analysis_manager"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,submitted,reviewed"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Reviewed" bg_color="bg-success" invisible="state != 'reviewed'"/>
+                    <widget name="web_ribbon" title="Late Submission" bg_color="bg-danger" invisible="is_late_submission == False"/>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" nolabel="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="analyst_id" readonly="state != 'draft'"/>
+                            <field name="date" readonly="state != 'draft'"/>
+                            <field name="time_spent_hours" readonly="state != 'draft'"/>
+                        </group>
+                        <group>
+                            <field name="reviewer_id" readonly="1"/>
+                            <field name="has_blockers" readonly="1"/>
+                            <field name="is_late_submission" invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Activities" name="activities">
+                            <group>
+                                <field name="planned_activities" nolabel="0" placeholder="What was planned for today..." readonly="state != 'draft'"/>
+                                <field name="actual_activities" nolabel="0" placeholder="What was actually completed..." readonly="state != 'draft'"/>
+                            </group>
+                        </page>
+                        <page string="Meetings &amp; Deliverables" name="meetings_deliverables">
+                            <group>
+                                <field name="meetings_summary" nolabel="0" placeholder="Meeting notes or outcomes..." readonly="state != 'draft'"/>
+                                <field name="deliverables_produced" nolabel="0" placeholder="Deliverables worked on or produced..." readonly="state != 'draft'"/>
+                            </group>
+                        </page>
+                        <page string="Follow-up &amp; Risks" name="followup_risks">
+                            <group>
+                                <field name="blockers_risks" nolabel="0" placeholder="Any blockers or risks encountered..." readonly="state != 'draft'"/>
+                                <field name="pending_followups" nolabel="0" placeholder="Pending tasks linking from today..." readonly="state != 'draft'"/>
+                                <field name="next_day_plan" nolabel="0" placeholder="Plan for the next working day..." readonly="state != 'draft'"/>
+                            </group>
+                        </page>
+                        <page string="Linked Records" name="linked_records">
+                            <group string="Analysis Requests">
+                                <field name="request_ids" widget="many2many_tags" nolabel="1" readonly="state != 'draft'"/>
+                            </group>
+                            <group string="Meetings">
+                                <field name="meeting_ids" widget="many2many_tags" nolabel="1" readonly="state != 'draft'"/>
+                            </group>
+                            <group string="Deliverables">
+                                <field name="deliverable_ids" widget="many2many_tags" nolabel="1" readonly="state != 'draft'"/>
+                            </group>
+                        </page>
+                        <page string="Review" name="review" invisible="state == 'draft'">
+                            <group>
+                                <field name="review_comment" nolabel="0" placeholder="Manager/Reviewer comments..." groups="analysis_management.group_analysis_reviewer,analysis_management.group_analysis_manager"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter>
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </chatter>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_analysis_daily_log_search" model="ir.ui.view">
+        <field name="name">analysis.daily.log.search</field>
+        <field name="model">analysis.daily.log</field>
+        <field name="arch" type="xml">
+            <search string="Search Daily Logs">
+                <field name="name"/>
+                <field name="analyst_id"/>
+                <field name="reviewer_id"/>
+                <field name="request_ids"/>
+
+                <filter string="My Logs" name="my_logs" domain="[('analyst_id', '=', uid)]"/>
+                <filter string="My Team Logs" name="my_team_logs" domain="[('reviewer_id', '=', uid)]"/>
+                <separator/>
+                <filter string="Today" name="today" domain="[('is_today', '=', True)]"/>
+                <separator/>
+                <filter string="Draft" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Submitted" name="submitted" domain="[('state', '=', 'submitted')]"/>
+                <filter string="Reviewed" name="reviewed" domain="[('state', '=', 'reviewed')]"/>
+                <separator/>
+                <filter string="With Blockers" name="has_blockers" domain="[('has_blockers', '=', True)]"/>
+                <filter string="Late Submission" name="late_submission" domain="[('is_late_submission', '=', True)]"/>
+
+                <group expand="0" string="Group By">
+                    <filter string="Analyst" name="group_by_analyst" context="{'group_by': 'analyst_id'}"/>
+                    <filter string="Reviewer" name="group_by_reviewer" context="{'group_by': 'reviewer_id'}"/>
+                    <filter string="Date" name="group_by_date" context="{'group_by': 'date'}"/>
+                    <filter string="State" name="group_by_state" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Graph View -->
+    <record id="view_analysis_daily_log_graph" model="ir.ui.view">
+        <field name="name">analysis.daily.log.graph</field>
+        <field name="model">analysis.daily.log</field>
+        <field name="arch" type="xml">
+            <graph string="Daily Logs" type="bar" sample="1">
+                <field name="analyst_id" type="row"/>
+                <field name="state" type="col"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- Pivot View -->
+    <record id="view_analysis_daily_log_pivot" model="ir.ui.view">
+        <field name="name">analysis.daily.log.pivot</field>
+        <field name="model">analysis.daily.log</field>
+        <field name="arch" type="xml">
+            <pivot string="Daily Logs" sample="1">
+                <field name="analyst_id" type="row"/>
+                <field name="date" interval="month" type="col"/>
+                <field name="time_spent_hours" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- Calendar View -->
+    <record id="view_analysis_daily_log_calendar" model="ir.ui.view">
+        <field name="name">analysis.daily.log.calendar</field>
+        <field name="model">analysis.daily.log</field>
+        <field name="arch" type="xml">
+            <calendar string="Daily Logs" date_start="date" color="analyst_id" mode="month" quick_create="False">
+                <field name="analyst_id" filters="1"/>
+                <field name="state"/>
+                <field name="time_spent_hours"/>
+            </calendar>
+        </field>
+    </record>
+
+</odoo>

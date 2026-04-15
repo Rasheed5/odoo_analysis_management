@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Paper Format for the Report -->
+    <record id="paperformat_analysis_change_request" model="report.paperformat">
+        <field name="name">Change Request Paper Format</field>
+        <field name="default" eval="True" />
+        <field name="format">A4</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">20</field>
+        <field name="margin_bottom">15</field>
+        <field name="margin_left">10</field>
+        <field name="margin_right">10</field>
+        <field name="header_line" eval="False" />
+        <field name="header_spacing">15</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <!-- Report Action -->
+    <record id="action_report_analysis_change_request" model="ir.actions.report">
+        <field name="name">Change Request Form</field>
+        <field name="model">analysis.change.request</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">analysis_management.report_change_request</field>
+        <field name="report_file">analysis_management.report_change_request</field>
+        <field name="print_report_name">'Change Request - %s' % (object.name)</field>
+        <field name="binding_model_id" ref="model_analysis_change_request"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- Report Template -->
+    <template id="report_change_request">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page" style="direction: rtl; text-align: right; font-family: 'Amiri', 'Inter', sans-serif;">
+                        <style>
+                            .cr-title { background-color: #f2f2f2; padding: 10px; border: 1px solid #000; text-align: center; margin-bottom: 20px; }
+                            .section-header { background-color: #e6e6e6; padding: 5px 10px; font-weight: bold; border: 1px solid #000; margin-top: 15px; }
+                            .data-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+                            .data-table th, .data-table td { border: 1px solid #000; padding: 5px; font-size: 12px; }
+                            .label-cell { background-color: #fafafa; font-weight: bold; width: 25%; }
+                            .value-cell { width: 25%; }
+                            .full-width-cell { width: 75%; }
+                        </style>
+
+                        <div class="cr-title">
+                            <h3>نموذج طلب تغيير</h3>
+                            <h4>Change Request Form</h4>
+                        </div>
+
+                        <!-- SECTION 1 & 2 Header Info -->
+                        <table class="data-table">
+                            <tr>
+                                <td class="label-cell">اسم المشروع / Project Name</td>
+                                <td class="value-cell"><span t-field="o.project_id.name"/></td>
+                                <td class="label-cell">رقم المشروع / Project Code</td>
+                                <td class="value-cell"><span t-field="o.project_code"/></td>
+                            </tr>
+                            <tr>
+                                <td class="label-cell">المرحلة الحالية / Current Phase</td>
+                                <td class="value-cell"><span t-field="o.current_phase_name"/></td>
+                                <td class="label-cell">رقم المرحلة / Phase No.</td>
+                                <td class="value-cell"><span t-field="o.phase_number"/></td>
+                            </tr>
+                            <tr>
+                                <td class="label-cell">اسم العميل / Customer Name</td>
+                                <td class="value-cell"><span t-field="o.customer_id.name"/></td>
+                                <td class="label-cell">تاريخ التعاقد / Contract Date</td>
+                                <td class="value-cell"><span t-field="o.contract_date"/></td>
+                            </tr>
+                        </table>
+
+                        <div class="section-header">معلومات طلب التغيير / Change Request Information</div>
+                        <table class="data-table">
+                            <tr>
+                                <td class="label-cell">رقم الطلب / CR Number</td>
+                                <td class="value-cell"><span t-field="o.name"/></td>
+                                <td class="label-cell">تاريخ الاستلام / Date Received</td>
+                                <td class="value-cell"><span t-field="o.date_received"/></td>
+                            </tr>
+                            <tr>
+                                <td class="label-cell">اسم طلب التغيير / CR Name</td>
+                                <td colspan="3"><span t-field="o.title"/></td>
+                            </tr>
+                            <tr>
+                                <td class="label-cell">مقدم الطلب / Submitted By</td>
+                                <td class="value-cell"><span t-field="o.submitted_by"/></td>
+                                <td class="label-cell">الدور الوظيفي / Role</td>
+                                <td class="value-cell"><span t-field="o.requester_role"/></td>
+                            </tr>
+                            <tr>
+                                <td class="label-cell">الأولوية / Priority</td>
+                                <td class="value-cell"><span t-field="o.priority"/></td>
+                                <td class="label-cell">نوع الطلب / Request Type</td>
+                                <td class="value-cell"><span t-field="o.request_type"/></td>
+                            </tr>
+                        </table>
+
+                        <!-- SECTION 3: Description -->
+                        <div class="section-header">وصف طلب التغيير / Change Request Description</div>
+                        <div style="border: 1px solid #000; padding: 10px; font-size: 12px;">
+                            <strong>الخلفية والسياق / Background:</strong>
+                            <div t-field="o.background"/>
+                            <br/>
+                            <strong>الوصف التفصيلي / Detailed Description:</strong>
+                            <div t-field="o.detailed_description"/>
+                            <br/>
+                            <strong>المبررات / Justification:</strong>
+                            <div t-field="o.justification"/>
+                        </div>
+
+                        <!-- SECTION 4: Impacts -->
+                        <div class="section-header">دراسة الأثر / Impact Analysis</div>
+                        <table class="data-table">
+                            <tr>
+                                <td class="label-cell">أثر النطاق (المرحلة) / Phase Scope Impact</td>
+                                <td><span t-field="o.phase_scope_impact"/></td>
+                            </tr>
+                            <tr>
+                                <td class="label-cell">أثر النطاق (المشروع) / Project Scope Impact</td>
+                                <td><span t-field="o.project_scope_impact"/></td>
+                            </tr>
+                        </table>
+
+                        <table class="data-table" t-if="o.component_ids">
+                            <tr>
+                                <th colspan="2">المكونات المتأثرة / Affected Components</th>
+                            </tr>
+                            <tr>
+                                <th>المستوى / Level</th>
+                                <th>المكون / Component</th>
+                            </tr>
+                            <tr t-foreach="o.component_ids" t-as="comp">
+                                <td><span t-field="comp.level"/></td>
+                                <td><span t-field="comp.name"/></td>
+                            </tr>
+                        </table>
+
+                        <table class="data-table">
+                            <tr>
+                                <td class="label-cell">أثر الجدول الزمني / Schedule Impact</td>
+                                <td class="value-cell"><span t-field="o.schedule_impact_level"/></td>
+                                <td class="label-cell">ملاحظات / Notes</td>
+                                <td class="value-cell"><span t-field="o.schedule_impact_notes"/></td>
+                            </tr>
+                        </table>
+
+                        <div class="section-header">الجهد والتكلفة التقديرية / Estimated Effort &amp; Cost</div>
+                        <table class="data-table">
+                            <tr>
+                                <th>النشاط / Activity</th>
+                                <th>الجهد (أيام) / Effort (Days)</th>
+                            </tr>
+                            <tr><td>جمع المتطلبات والتحليل / Requirements &amp; Analysis</td><td class="text-center"><span t-field="o.days_analysis"/></td></tr>
+                            <tr><td>الإعداد والتهيئة / Configuration &amp; Setup</td><td class="text-center"><span t-field="o.days_config"/></td></tr>
+                            <tr><td>التخصيص والتطوير / Development</td><td class="text-center"><span t-field="o.days_dev"/></td></tr>
+                            <tr><td>الاختبار والنشر / Testing &amp; Deployment</td><td class="text-center"><span t-field="o.days_testing"/></td></tr>
+                            <tr><td>التدريب والتمكين / Training &amp; Enablement</td><td class="text-center"><span t-field="o.days_training"/></td></tr>
+                            <tr style="background-color: #eee; font-weight: bold;">
+                                <td>إجمالي الجهد المقدر / Total Estimated Effort</td>
+                                <td class="text-center"><span t-field="o.estimated_work_days"/></td>
+                            </tr>
+                            <tr>
+                                <td class="label-cell">التكلفة التقديرية / Estimated Cost</td>
+                                <td class="text-center"><span t-field="o.estimated_cost"/></td>
+                            </tr>
+                        </table>
+
+                        <!-- SECTION 5: Risks -->
+                        <div class="section-header" t-if="o.risk_ids">المخاطر والحد منها / Risks &amp; Mitigation</div>
+                        <table class="data-table" t-if="o.risk_ids">
+                            <tr>
+                                <th>الخطر / Risk</th>
+                                <th>الاحتمالية / Prob.</th>
+                                <th>الأثر / Impact</th>
+                                <th>الإجراء / Mitigation</th>
+                            </tr>
+                            <tr t-foreach="o.risk_ids" t-as="risk">
+                                <td><span t-field="risk.name"/></td>
+                                <td><span t-field="risk.probability"/></td>
+                                <td><span t-field="risk.impact"/></td>
+                                <td><span t-field="risk.mitigation"/></td>
+                            </tr>
+                        </table>
+
+                        <!-- SECTION 6: Alternatives and Recommendations -->
+                        <div class="section-header">البدائل والتوصيات / Alternatives &amp; Recommendations</div>
+                        <div style="border: 1px solid #000; padding: 10px; font-size: 12px;">
+                            <strong>البدائل المقترحة / Proposed Alternatives:</strong>
+                            <div t-field="o.proposed_alternatives"/>
+                            <br/>
+                            <strong>التوصية النهائية / Final Recommendation:</strong>
+                            <div t-field="o.final_recommendations"/>
+                        </div>
+
+                        <!-- SECTION 7: Assumptions and Constraints -->
+                        <div class="section-header">الافتراضات والقيود / Assumptions &amp; Constraints</div>
+                        <table class="data-table">
+                            <tr style="background-color: #eee;">
+                                <th style="width: 50%;">الافتراضات / Assumptions</th>
+                                <th style="width: 50%;">القيود / Constraints</th>
+                            </tr>
+                            <tr>
+                                <td style="vertical-align: top;">
+                                    <ul style="padding-right: 20px;">
+                                        <li t-foreach="o.assumption_ids" t-as="a"><span t-field="a.name"/></li>
+                                    </ul>
+                                </td>
+                                <td style="vertical-align: top;">
+                                    <ul style="padding-right: 20px;">
+                                        <li t-foreach="o.constraint_ids" t-as="c"><span t-field="c.name"/></li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- SECTION 8: Signatures -->
+                        <div style="page-break-inside: avoid;">
+                            <div class="section-header">الاعتماد والتوقيع / Approval &amp; Signature</div>
+                            <div style="border: 1px solid #000; padding: 10px; font-size: 11px;">
+                                <div t-field="o.mutual_declarations"/>
+                            </div>
+                            <table class="data-table" style="margin-top: 5px;">
+                                <tr>
+                                    <td class="label-cell">القرار النهائي / Final Decision</td>
+                                    <td colspan="3" class="text-center" style="font-size: 14px; font-weight: bold;">
+                                        [<span t-field="o.client_decision"/>]
+                                    </td>
+                                </tr>
+                                <tr style="height: 60px;">
+                                    <td class="label-cell">توقيع مقدم الطلب / Requester Sign</td>
+                                    <td class="value-cell"></td>
+                                    <td class="label-cell">توقيع المعتمد / Approver Sign</td>
+                                    <td class="value-cell"></td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">الاسم / Name</td>
+                                    <td class="value-cell"><span t-field="o.requester_sign_name"/></td>
+                                    <td class="label-cell">الاسم / Name</td>
+                                    <td class="value-cell"><span t-field="o.approver_sign_name"/></td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">التاريخ / Date</td>
+                                    <td class="value-cell"><span t-field="o.requester_sign_date"/></td>
+                                    <td class="label-cell">التاريخ / Date</td>
+                                    <td class="value-cell"><span t-field="o.approver_sign_date"/></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

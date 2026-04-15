@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- List / Tree View -->
+    <!-- Action Item List View: Simple utility view for mass editing and review -->
+    <record id="view_analysis_action_item_tree" model="ir.ui.view">
+        <field name="name">analysis.action.item.tree</field>
+        <field name="model">analysis.action.item</field>
+        <field name="arch" type="xml">
+            <list string="Action Items" decoration-danger="is_overdue==True" decoration-muted="state in ('done','cancelled')" decoration-warning="priority=='critical'">
+                <field name="reference"/>
+                <field name="name"/>
+                <field name="owner_id" widget="many2one_avatar_user"/>
+                <field name="source_type"/>
+                <field name="request_id" optional="show"/>
+                <field name="due_date"/>
+                <field name="priority" widget="badge" decoration-danger="priority == 'critical'" decoration-warning="priority == 'high'" decoration-info="priority == 'medium'"/>
+                <field name="escalation_required" widget="boolean_toggle" readonly="1" optional="show"/>
+                <field name="is_overdue" column_invisible="1"/>
+                <field name="state" widget="badge" decoration-success="state == 'done'" decoration-warning="state == 'waiting'" decoration-info="state == 'in_progress'" decoration-muted="state == 'cancelled'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Kanban View -->
+    <!-- Kanban View: Visual board for status tracking and priority management -->
+    <record id="view_analysis_action_item_kanban" model="ir.ui.view">
+        <field name="name">analysis.action.item.kanban</field>
+        <field name="model">analysis.action.item</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" class="o_kanban_small_column">
+                <field name="state"/>
+                <field name="priority"/>
+                <field name="is_overdue"/>
+                <field name="escalation_required"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_color_{{kanban_getcolor(record.priority.raw_value)}} oe_kanban_global_click">
+                            <div class="o_dropdown_kanban dropdown">
+                                <a class="dropdown-toggle o-no-caret btn" role="button" data-bs-toggle="dropdown" href="#" aria-label="Dropdown menu" title="Dropdown menu">
+                                    <span class="fa fa-ellipsis-v"/>
+                                </a>
+                                <div class="dropdown-menu" role="menu">
+                                    <a role="menuitem" type="edit" class="dropdown-item">Edit</a>
+                                    <a role="menuitem" type="delete" class="dropdown-item">Delete</a>
+                                    <div role="separator" class="dropdown-divider"/>
+                                    <a role="menuitem" type="object" name="action_mark_done" class="dropdown-item" invisible="state == 'done'">Mark Done</a>
+                                </div>
+                            </div>
+                            <div class="oe_kanban_content">
+                                <div class="o_kanban_record_top">
+                                    <div class="o_kanban_record_headings">
+                                        <strong class="o_kanban_record_title">
+                                            <span t-if="record.reference.value"><field name="reference"/> - </span>
+                                            <field name="name"/>
+                                        </strong>
+                                    </div>
+                                </div>
+                                <div class="o_kanban_record_body">
+                                    <div t-if="record.is_overdue.raw_value" class="text-danger fw-bold">
+                                        <i class="fa fa-exclamation-triangle"/> Overdue: <field name="due_date"/>
+                                        <span t-if="record.escalation_required.raw_value" class="ms-2">
+                                            <i class="fa fa-arrow-up"/> Escalated
+                                        </span>
+                                    </div>
+                                    <div t-else="">
+                                        <field name="due_date"/>
+                                    </div>
+                                    <div>
+                                        <field name="source_display"/>
+                                    </div>
+                                </div>
+                                <div class="o_kanban_record_bottom">
+                                    <div class="oe_kanban_bottom_left">
+                                        <field name="priority" widget="label_selection" options="{'classes': {'critical': 'danger', 'high': 'warning', 'medium': 'info', 'low': 'default'}}"/>
+                                    </div>
+                                    <div class="oe_kanban_bottom_right">
+                                        <field name="owner_id" widget="many2one_avatar_user"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_analysis_action_item_form" model="ir.ui.view">
+        <field name="name">analysis.action.item.form</field>
+        <field name="model">analysis.action.item</field>
+        <field name="arch" type="xml">
+            <form string="Action Item">
+                <header>
+                    <button name="action_start_progress" string="Start Progress" type="object" class="oe_highlight" invisible="state != 'open'"/>
+                    <button name="action_mark_waiting" string="Mark Waiting" type="object" invisible="state not in ('open', 'in_progress')"/>
+                    <button name="action_mark_done" string="Mark Done" type="object" class="oe_highlight" invisible="state in ('done', 'cancelled')"/>
+                    <button name="action_cancel" string="Cancel" type="object" invisible="state in ('done', 'cancelled')"/>
+                    <button name="action_reset_to_open" string="Reopen / Reset" type="object" invisible="state not in ('done', 'cancelled')" groups="analysis_management.group_analysis_reviewer,analysis_management.group_analysis_manager"/>
+                    <field name="state" widget="statusbar" statusbar_visible="open,in_progress,waiting,done"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Overdue" bg_color="bg-danger" invisible="is_overdue == False"/>
+                    <widget name="web_ribbon" title="Escalated" bg_color="bg-warning" invisible="escalation_required == False"/>
+                    <widget name="web_ribbon" title="Done" bg_color="bg-success" invisible="state != 'done'"/>
+
+                    <div class="oe_title">
+                        <h2>
+                            <field name="reference"/>
+                        </h2>
+                        <h1>
+                            <field name="name" nolabel="1" placeholder="e.g. Schedule meeting with HR for specific use cases..."/>
+                        </h1>
+                        <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}" placeholder="Tags..."/>
+                    </div>
+
+                    <group>
+                        <group string="Assignments &amp; Control">
+                            <field name="owner_id" widget="many2one_avatar_user"/>
+                            <field name="created_by" widget="many2one_avatar_user"/>
+                            <field name="reviewer_id" widget="many2one_avatar_user"/>
+                            <field name="priority" widget="priority"/>
+                        </group>
+                        <group string="Timeline &amp; Escalation">
+                            <field name="due_date"/>
+                            <field name="start_date"/>
+                            <field name="completed_date"/>
+                            <field name="escalation_required"/>
+                            <field name="is_overdue" invisible="1"/>
+                        </group>
+                    </group>
+
+                    <group string="Source Reference">
+                        <field name="source_type"/>
+                        <field name="source_display" invisible="1"/>
+                    </group>
+
+                    <notebook>
+                        <page string="Details" name="details">
+                            <group>
+                                <field name="followup_notes" placeholder="Notes for follow up, steps to reproduce..."/>
+                                <field name="resolution_note" placeholder="Final resolution note after completion..." readonly="state in ('done', 'cancelled')"/>
+                                <field name="escalation_note" placeholder="Why this is escalated..." invisible="escalation_required == False"/>
+                            </group>
+                        </page>
+                        <page string="Source Links" name="source_links">
+                            <group>
+                                <field name="meeting_ids" widget="many2many_tags" invisible="source_type != 'meeting'"/>
+                                <field name="request_id" invisible="source_type != 'request'"/>
+                                <field name="requirement_ids" widget="many2many_tags" invisible="source_type != 'requirement_review'"/>
+                                <field name="deliverable_ids" widget="many2many_tags" invisible="source_type != 'deliverable_review'"/>
+                                <field name="daily_log_id" invisible="source_type != 'daily_log'"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter>
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </chatter>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_analysis_action_item_search" model="ir.ui.view">
+        <field name="name">analysis.action.item.search</field>
+        <field name="model">analysis.action.item</field>
+        <field name="arch" type="xml">
+            <search string="Search Action Items">
+                <field name="name"/>
+                <field name="reference"/>
+                <field name="owner_id"/>
+                <field name="created_by"/>
+                <field name="reviewer_id"/>
+                <field name="source_display"/>
+                <field name="tag_ids"/>
+
+                <filter string="My Action Items" name="my_action_items" domain="[('owner_id', '=', uid)]"/>
+                <separator/>
+                <filter string="Open" name="state_open" domain="[('state', '=', 'open')]"/>
+                <filter string="In Progress" name="state_in_progress" domain="[('state', '=', 'in_progress')]"/>
+                <filter string="Waiting" name="state_waiting" domain="[('state', '=', 'waiting')]"/>
+                <filter string="Done" name="state_done" domain="[('state', '=', 'done')]"/>
+                <filter string="Cancelled" name="state_cancelled" domain="[('state', '=', 'cancelled')]"/>
+                <separator/>
+                <filter string="Overdue" name="overdue" domain="[('is_overdue', '=', True)]"/>
+                <filter string="Escalated" name="escalated" domain="[('escalation_required', '=', True)]"/>
+                <separator/>
+                <filter string="High Priority" name="priority_high" domain="[('priority', '=', 'high')]"/>
+                <filter string="Critical Priority" name="priority_critical" domain="[('priority', '=', 'critical')]"/>
+                <separator/>
+                <filter string="Linked to Request" name="linked_request" domain="[('request_id', '!=', False)]"/>
+                <filter string="Linked to Meeting" name="linked_meeting" domain="[('meeting_ids', '!=', False)]"/>
+
+                <group expand="0" string="Group By">
+                    <filter string="Owner" name="group_by_owner" context="{'group_by': 'owner_id'}"/>
+                    <filter string="State" name="group_by_state" context="{'group_by': 'state'}"/>
+                    <filter string="Priority" name="group_by_priority" context="{'group_by': 'priority'}"/>
+                    <filter string="Source Type" name="group_by_source" context="{'group_by': 'source_type'}"/>
+                    <filter string="Due Date" name="group_by_due_date" context="{'group_by': 'due_date'}"/>
+                    <filter string="Request" name="group_by_request" context="{'group_by': 'request_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Graph View -->
+    <record id="view_analysis_action_item_graph" model="ir.ui.view">
+        <field name="name">analysis.action.item.graph</field>
+        <field name="model">analysis.action.item</field>
+        <field name="arch" type="xml">
+            <graph string="Action Items" type="bar" sample="1">
+                <field name="owner_id" type="row"/>
+                <field name="state" type="col"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- Pivot View -->
+    <record id="view_analysis_action_item_pivot" model="ir.ui.view">
+        <field name="name">analysis.action.item.pivot</field>
+        <field name="model">analysis.action.item</field>
+        <field name="arch" type="xml">
+            <pivot string="Action Items" sample="1">
+                <field name="owner_id" type="row"/>
+                <field name="state" type="col"/>
+            </pivot>
+        </field>
+    </record>
+
+</odoo>

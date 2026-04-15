@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Sequence for Analysis Meeting -->
+        <record id="seq_analysis_meeting" model="ir.sequence">
+            <field name="name">Analysis Meeting Sequence</field>
+            <field name="code">analysis.meeting</field>
+            <field name="prefix">MTG/%(year)s/</field>
+            <field name="padding">4</field>
+            <field name="company_id" eval="False"/>
+        </record>
+    </data>
+</odoo>

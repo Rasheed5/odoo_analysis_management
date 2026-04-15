@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Client Action for the Dashboard -->
+    <record id="action_analysis_management_dashboard" model="ir.actions.client">
+        <field name="name">Dashboard</field>
+        <field name="tag">analysis_management.dashboard</field>
+    </record>
+</odoo>

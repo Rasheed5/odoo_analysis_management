@@ -1,0 +1,26 @@
+# Odoo Git Ignore File
+*.py[cod]
+__pycache__/
+*.so
+*.swp
+*~
+*.log
+
+# Data
+data/*.bin
+data/*.db
+
+# IDEs
+.idea/
+.vscode/
+.project
+.pydevproject
+
+# System
+Thumbs.db
+.DS_Store
+
+# Odoo Specific
+odoo.log
+*.pyc
+*.pyo

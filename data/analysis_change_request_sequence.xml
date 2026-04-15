@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Sequence for Change Requests -->
+        <record id="seq_analysis_change_request" model="ir.sequence">
+            <field name="name">Change Request Sequence</field>
+            <field name="code">analysis.change.request</field>
+            <field name="prefix">CR-%(year)s-</field>
+            <field name="padding">4</field>
+            <field name="company_id" eval="False"/>
+        </record>
+    </data>
+</odoo>

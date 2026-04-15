@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Sequence for Analysis Request -->
+        <record id="seq_analysis_request" model="ir.sequence">
+            <field name="name">Analysis Request Sequence</field>
+            <field name="code">analysis.request</field>
+            <field name="prefix">AR-%(year)s-</field>
+            <field name="padding">4</field>
+            <field name="company_id" eval="False"/>
+        </record>
+    </data>
+</odoo>

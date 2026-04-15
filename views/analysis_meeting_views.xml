@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- List / Tree View -->
+    <record id="view_analysis_meeting_tree" model="ir.ui.view">
+        <field name="name">analysis.meeting.tree</field>
+        <field name="model">analysis.meeting</field>
+        <field name="arch" type="xml">
+            <list string="Analysis Meetings" decoration-muted="state == 'cancelled'" decoration-success="state == 'completed'">
+                <field name="name"/>
+                <field name="meeting_datetime"/>
+                <field name="duration_hours" sum="Total Hours" optional="show"/>
+                <field name="organizer_id" widget="many2one_avatar_user"/>
+                <field name="request_id" optional="show"/>
+                <field name="meeting_type"/>
+                <field name="participant_count" optional="show"/>
+                <field name="state" widget="badge" decoration-success="state == 'completed'" decoration-muted="state == 'cancelled'" decoration-info="state == 'planned'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_analysis_meeting_form" model="ir.ui.view">
+        <field name="name">analysis.meeting.form</field>
+        <field name="model">analysis.meeting</field>
+        <field name="arch" type="xml">
+            <form string="Analysis Meeting">
+                <header>
+                    <button name="action_mark_completed" string="Mark Completed" type="object" class="oe_highlight" invisible="state != 'planned'"/>
+                    <button name="action_cancel" string="Cancel" type="object" invisible="state != 'planned'"/>
+                    <button name="action_reset_to_planned" string="Reset to Planned" type="object" invisible="state == 'planned'" groups="analysis_management.group_analysis_reviewer,analysis_management.group_analysis_manager"/>
+                    <field name="state" widget="statusbar" statusbar_visible="planned,completed"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_action_items" type="object" class="oe_stat_button" icon="fa-check-square-o">
+                            <field name="action_item_count" widget="statinfo" string="Action Items"/>
+                        </button>
+                        <button name="action_view_requirements" type="object" class="oe_stat_button" icon="fa-list-ol">
+                            <field name="requirement_count" widget="statinfo" string="Requirements"/>
+                        </button>
+                        <button name="action_view_deliverables" type="object" class="oe_stat_button" icon="fa-file-text-o">
+                            <field name="deliverable_count" widget="statinfo" string="Deliverables"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Completed" bg_color="bg-success" invisible="state != 'completed'"/>
+                    <widget name="web_ribbon" title="Cancelled" bg_color="bg-danger" invisible="state != 'cancelled'"/>
+                    
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" nolabel="1" placeholder="e.g. Requirement Gathering Session..."/>
+                        </h1>
+                        <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}" placeholder="Tags..."/>
+                    </div>
+                    <group>
+                        <group string="Meeting Parameters">
+                            <field name="name"/>
+                            <field name="meeting_datetime"/>
+                            <field name="meeting_type"/>
+                        </group>
+                        <group string="Context">
+                            <field name="request_id"/>
+                            <field name="organizer_id" string="Organizer"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Content &amp; Outcomes">
+                            <!-- Captures the actual value generated during the meeting -->
+                            <group>
+                                <field name="agenda" widget="html"/>
+                                <field name="discussion_notes" widget="html"/>
+                                <field name="decisions" widget="html"/>
+                            </group>
+                        </page>
+                        <page string="Attendees">
+                            <field name="participant_ids" widget="many2many_tags" placeholder="Add attendees..."/>
+                        </page>
+                        <page string="Linked Results">
+                            <!-- Quick access to items created or reviewed during this meeting -->
+                            <group>
+                                <field name="action_item_ids" widget="many2many_tags"/>
+                                <field name="requirement_ids" widget="many2many_tags"/>
+                                <field name="deliverable_ids" widget="many2many_tags"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter>
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </chatter>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_analysis_meeting_search" model="ir.ui.view">
+        <field name="name">analysis.meeting.search</field>
+        <field name="model">analysis.meeting</field>
+        <field name="arch" type="xml">
+            <search string="Search Meetings">
+                <field name="name"/>
+                <field name="meeting_code"/>
+                <field name="organizer_id"/>
+                <field name="request_id"/>
+                <field name="participant_ids"/>
+                <field name="tag_ids"/>
+
+                <filter string="My Meetings" name="my_meetings" domain="[('participant_ids', 'in', uid)]"/>
+                <filter string="Meetings I Organized" name="my_organized_meetings" domain="[('organizer_id', '=', uid)]"/>
+                <separator/>
+                <filter string="Today" name="today" domain="[('meeting_datetime', '&gt;=', datetime.datetime.combine(context_today(), datetime.time(0,0,0))), ('meeting_datetime', '&lt;=', datetime.datetime.combine(context_today(), datetime.time(23,59,59)))]"/>
+                <filter string="Upcoming" name="upcoming" domain="[('meeting_datetime', '&gt;=', context_today().strftime('%Y-%m-%d %H:%M:%S'))]"/>
+                <filter string="Past Meetings" name="past_meetings" domain="[('is_past_meeting', '=', True)]"/>
+                <separator/>
+                <filter string="Planned" name="planned" domain="[('state', '=', 'planned')]"/>
+                <filter string="Completed" name="completed" domain="[('state', '=', 'completed')]"/>
+                <filter string="Cancelled" name="cancelled" domain="[('state', '=', 'cancelled')]"/>
+                <separator/>
+                <filter string="With Open Questions" name="open_questions_filter" domain="[('has_open_questions', '=', True)]"/>
+                <filter string="Linked to Request" name="has_request" domain="[('request_id', '!=', False)]"/>
+
+                <group expand="0" string="Group By">
+                    <filter string="Organizer" name="group_by_organizer" context="{'group_by': 'organizer_id'}"/>
+                    <filter string="Meeting Type" name="group_by_type" context="{'group_by': 'meeting_type'}"/>
+                    <filter string="State" name="group_by_state" context="{'group_by': 'state'}"/>
+                    <filter string="Request" name="group_by_request" context="{'group_by': 'request_id'}"/>
+                    <filter string="Date" name="group_by_date" context="{'group_by': 'meeting_datetime:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Calendar View -->
+    <!-- Meeting Calendar View: Allows analysts to see their workshop schedule visually -->
+    <record id="view_analysis_meeting_calendar" model="ir.ui.view">
+        <field name="name">analysis.meeting.calendar</field>
+        <field name="model">analysis.meeting</field>
+        <field name="arch" type="xml">
+            <calendar string="Analysis Meetings" date_start="meeting_datetime" color="meeting_type" event_open_popup="True" quick_create="False">
+                <field name="name"/>
+                <field name="organizer_id" filters="1"/>
+                <field name="state" filters="1"/>
+            </calendar>
+        </field>
+    </record>
+
+    <!-- Graph View -->
+    <record id="view_analysis_meeting_graph" model="ir.ui.view">
+        <field name="name">analysis.meeting.graph</field>
+        <field name="model">analysis.meeting</field>
+        <field name="arch" type="xml">
+            <graph string="Analysis Meetings" type="bar" sample="1">
+                <field name="meeting_type" type="row"/>
+                <field name="state" type="col"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- Pivot View -->
+    <record id="view_analysis_meeting_pivot" model="ir.ui.view">
+        <field name="name">analysis.meeting.pivot</field>
+        <field name="model">analysis.meeting</field>
+        <field name="arch" type="xml">
+            <pivot string="Analysis Meetings" sample="1">
+                <field name="organizer_id" type="row"/>
+                <field name="meeting_datetime" interval="month" type="col"/>
+                <field name="duration_hours" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+</odoo>

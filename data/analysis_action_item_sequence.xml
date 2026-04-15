@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Sequence for Analysis Action Items -->
+        <record id="seq_analysis_action_item" model="ir.sequence">
+            <field name="name">Analysis Action Item Sequence</field>
+            <field name="code">analysis.action.item</field>
+            <field name="prefix">AI/%(year)s/</field>
+            <field name="padding">4</field>
+            <field name="company_id" eval="False"/>
+        </record>
+    </data>
+</odoo>
