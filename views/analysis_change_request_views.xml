@@ -61,9 +61,9 @@
                     <button name="action_review" string="Start Review" type="object" class="oe_highlight" invisible="state != 'submitted'"/>
                     <button name="action_analyze_impact" string="Analyze Impact" type="object" invisible="state != 'under_review'"/>
                     <button name="action_ready_for_approval" string="Ready for Approval" type="object" class="oe_highlight" invisible="state != 'pending_impact'"/>
-                    <button name="action_approve" string="Approve" type="object" class="oe_highlight" invisible="state != 'pending_approval'" groups="analysis_management.group_analysis_manager"/>
-                    <button name="action_postpone" string="Postpone" type="object" invisible="state != 'pending_approval'" groups="analysis_management.group_analysis_manager"/>
-                    <button name="action_reject" string="Reject" type="object" invisible="state != 'pending_approval'" groups="analysis_management.group_analysis_manager"/>
+                    <button name="action_approve" string="Approve" type="object" class="oe_highlight" invisible="state != 'pending_approval'" groups="group_analysis_manager"/>
+                    <button name="action_postpone" string="Postpone" type="object" invisible="state != 'pending_approval'" groups="group_analysis_manager"/>
+                    <button name="action_reject" string="Reject" type="object" invisible="state != 'pending_approval'" groups="group_analysis_manager"/>
                     <button name="action_convert_to_analysis" string="Convert to Analysis" type="object" class="oe_highlight" invisible="state != 'approved' or analysis_request_id"/>
                     <button name="action_close" string="Close" type="object" invisible="state not in ('approved', 'converted')"/>
                     <button name="action_reset_to_draft" string="Reset to Draft" type="object" invisible="state not in ('rejected', 'postponed')"/>

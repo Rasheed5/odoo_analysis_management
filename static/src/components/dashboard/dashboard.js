@@ -36,6 +36,7 @@ export class AnalysisDashboard extends Component {
                 risks: {},
                 snapshot: { requirements: {}, deliverables: {} },
                 my_work: {},
+                change_requests: { total_open: 0, total_cost: 0 },
                 domains: {},
                 charts: { type_distribution: { labels: [], data: [] }, monthly_velocity: { labels: [], data: [] } },
             },
@@ -132,9 +133,16 @@ export class AnalysisDashboard extends Component {
             const data = await this.orm.call("analysis.dashboard", "get_dashboard_data", []);
             if (data) {
                 this.state.data = data;
+                // Force a safe fallback for financial total if backend returns null
+                if (this.state.data.change_requests && this.state.data.change_requests.total_cost === undefined) {
+                    this.state.data.change_requests.total_cost = 0;
+                }
+            } else {
+                console.warn("Dashboard: Backend returned no data.");
             }
         } catch (error) {
-            console.error("Dashboard failed to load data:", error);
+            console.error("Dashboard CRITICAL ERROR: Failed to load data from backend.", error);
+            // We keep the loading=false so the dashboard still shows (with 0s) rather than a stuck spinner
         } finally {
             this.state.loading = false;
         }

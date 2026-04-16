@@ -96,7 +96,7 @@
                     <button name="action_mark_waiting" string="Mark Waiting" type="object" invisible="state not in ('open', 'in_progress')"/>
                     <button name="action_mark_done" string="Mark Done" type="object" class="oe_highlight" invisible="state in ('done', 'cancelled')"/>
                     <button name="action_cancel" string="Cancel" type="object" invisible="state in ('done', 'cancelled')"/>
-                    <button name="action_reset_to_open" string="Reopen / Reset" type="object" invisible="state not in ('done', 'cancelled')" groups="analysis_management.group_analysis_reviewer,analysis_management.group_analysis_manager"/>
+                    <button name="action_reset_to_open" string="Reopen / Reset" type="object" invisible="state not in ('done', 'cancelled')" groups="group_analysis_reviewer,group_analysis_manager"/>
                     <field name="state" widget="statusbar" statusbar_visible="open,in_progress,waiting,done"/>
                 </header>
                 <sheet>

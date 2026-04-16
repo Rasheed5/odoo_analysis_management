@@ -27,7 +27,7 @@
                 <header>
                     <button name="action_mark_completed" string="Mark Completed" type="object" class="oe_highlight" invisible="state != 'planned'"/>
                     <button name="action_cancel" string="Cancel" type="object" invisible="state != 'planned'"/>
-                    <button name="action_reset_to_planned" string="Reset to Planned" type="object" invisible="state == 'planned'" groups="analysis_management.group_analysis_reviewer,analysis_management.group_analysis_manager"/>
+                    <button name="action_reset_to_planned" string="Reset to Planned" type="object" invisible="state == 'planned'" groups="group_analysis_reviewer,group_analysis_manager"/>
                     <field name="state" widget="statusbar" statusbar_visible="planned,completed"/>
                 </header>
                 <sheet>

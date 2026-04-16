@@ -32,8 +32,8 @@
                     <button name="action_submit_for_review" string="Submit for Review" type="object" class="oe_highlight" invisible="state != 'new'"/>
                     
                     <!-- Approvals by reviewers / managers -->
-                    <button name="action_approve" string="Approve" type="object" class="oe_highlight" invisible="state != 'under_review'" groups="analysis_management.group_analysis_reviewer,analysis_management.group_analysis_manager"/>
-                    <button name="action_reject" string="Reject" type="object" invisible="state not in ('under_review', 'pending_review')" groups="analysis_management.group_analysis_reviewer,analysis_management.group_analysis_manager"/>
+                    <button name="action_approve" string="Approve" type="object" class="oe_highlight" invisible="state != 'under_review'" groups="group_analysis_reviewer,group_analysis_manager"/>
+                    <button name="action_reject" string="Reject" type="object" invisible="state not in ('under_review', 'pending_review')" groups="group_analysis_reviewer,group_analysis_manager"/>
                     
                     <button name="action_assign" string="Assign" type="object" class="oe_highlight" invisible="state != 'approved'"/>
                     <button name="action_start_work" string="Start Work" type="object" class="oe_highlight" invisible="state not in ('assigned', 'waiting_business', 'waiting_technical')"/>
@@ -44,11 +44,11 @@
                     <button name="action_submit_for_final_review" string="Submit for Final Review" type="object" class="oe_highlight" invisible="state != 'in_progress'"/>
                     
                     <!-- Mark Completed by managers/reviewers typically or analysts -->
-                    <button name="action_mark_completed" string="Mark Completed" type="object" class="oe_highlight" invisible="state != 'pending_review'" groups="analysis_management.group_analysis_reviewer,analysis_management.group_analysis_manager"/>
+                    <button name="action_mark_completed" string="Mark Completed" type="object" class="oe_highlight" invisible="state != 'pending_review'" groups="group_analysis_reviewer,group_analysis_manager"/>
                     <button name="action_mark_completed" string="Mark Completed" type="object" invisible="state != 'in_progress'"/>
                     
-                    <button name="action_close" string="Close" type="object" invisible="state not in ('completed', 'rejected')" groups="analysis_management.group_analysis_manager"/>
-                    <button name="action_reset_to_new" string="Reset to New" type="object" invisible="state not in ('rejected', 'closed', 'assigned')" groups="analysis_management.group_analysis_manager"/>
+                    <button name="action_close" string="Close" type="object" invisible="state not in ('completed', 'rejected')" groups="group_analysis_manager"/>
+                    <button name="action_reset_to_new" string="Reset to New" type="object" invisible="state not in ('rejected', 'closed', 'assigned')" groups="group_analysis_manager"/>
                     
                     <field name="state" widget="statusbar" statusbar_visible="new,under_review,approved,assigned,in_progress,completed"/>
                 </header>
@@ -128,7 +128,7 @@
                                 <field name="risks"/>
                             </group>
                         </page>
-                        <page string="Internal Notes" name="internal_notes" groups="analysis_management.group_analysis_user">
+                        <page string="Internal Notes" name="internal_notes" groups="group_analysis_user">
                             <field name="internal_note" placeholder="Notes for the analysis team..."/>
                         </page>
                         <page string="Requirements" name="requirements">

@@ -42,7 +42,7 @@ class AnalysisDashboard(models.AbstractModel):
         pending_impact_crs = self.env['analysis.change.request'].search_count([('state', 'in', ['under_review', 'pending_impact'])])
         pending_approval_crs = self.env['analysis.change.request'].search_count([('state', '=', 'pending_approval')])
         approved_crs = self.env['analysis.change.request'].search([('state', '=', 'approved')])
-        total_cr_cost = sum(approved_crs.mapped('estimated_cost'))
+        total_cr_cost = sum(c.estimated_cost or 0.0 for c in approved_crs)
 
         # 2. Request Pipeline / Workflow Overview
         states = ['new', 'under_review', 'approved', 'assigned', 'in_progress', 'waiting_business', 'waiting_technical', 'pending_review', 'completed', 'closed', 'rejected']
@@ -56,7 +56,13 @@ class AnalysisDashboard(models.AbstractModel):
             })
 
         # 3. Analyst Workload Overview
-        analysts = self.env['res.users'].search([('groups_id', 'in', self.env.ref('analysis_management.group_analysis_user').id)])
+        # Using self._module ensures we find the group regardless of module folder name
+        try:
+            analysts = self.env.ref('%s.group_analysis_user' % self._module).users
+        except (ValueError, AttributeError):
+            # Fallback if XML ID not found during install/migration
+            analysts = self.env['res.users'].browse()
+        
         workload_data = []
         for analyst in analysts:
             workload_data.append({
@@ -185,8 +191,8 @@ class AnalysisDashboard(models.AbstractModel):
                 end_month = current_iter.replace(month=current_iter.month + 1)
                 
             count = self.env['analysis.request'].search_count([
-                ('create_date', '>=', fields.Datetime.to_string(start_month)),
-                ('create_date', '<', fields.Datetime.to_string(end_month))
+                ('create_date', '>=', start_month),
+                ('create_date', '<', end_month)
             ])
             
             # Insert at beginning to keep chronological order
