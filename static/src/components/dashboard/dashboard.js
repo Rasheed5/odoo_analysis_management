@@ -4,7 +4,6 @@ import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { Component, onWillStart, useState, onMounted, onWillUnmount, useRef } from "@odoo/owl";
 import { loadJS } from "@web/core/assets";
-import { user } from "@web/core/user";
 
 /**
  * AnalysisDashboard Component
