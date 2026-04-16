@@ -37,6 +37,12 @@ class AnalysisDashboard(models.AbstractModel):
             ('meeting_datetime', '>=', today),
             ('meeting_datetime', '<', today + timedelta(days=1))
         ])
+        # Change Requests
+        open_crs = self.env['analysis.change.request'].search([('state', 'not in', ['closed', 'rejected', 'converted'])])
+        pending_impact_crs = self.env['analysis.change.request'].search_count([('state', 'in', ['under_review', 'pending_impact'])])
+        pending_approval_crs = self.env['analysis.change.request'].search_count([('state', '=', 'pending_approval')])
+        approved_crs = self.env['analysis.change.request'].search([('state', '=', 'approved')])
+        total_cr_cost = sum(approved_crs.mapped('estimated_cost'))
 
         # 2. Request Pipeline / Workflow Overview
         states = ['new', 'under_review', 'approved', 'assigned', 'in_progress', 'waiting_business', 'waiting_technical', 'pending_review', 'completed', 'closed', 'rejected']
@@ -80,16 +86,21 @@ class AnalysisDashboard(models.AbstractModel):
             'finalized': self.env['analysis.deliverable'].search_count([('state', '=', 'finalized')]),
         }
 
-        # 6. Personal "My Work"
+        # 6. Personal "My Work" - Defined domains for both counting and frontend navigation
+        my_req_domain = [('analyst_ids', 'in', user.id), ('state', 'not in', ['completed', 'closed', 'rejected'])]
+        my_act_domain = [('owner_id', '=', user.id), ('state', '=', 'open')]
+        my_del_domain = [('analyst_ids', 'in', user.id), ('state', 'in', ['draft', 'in_progress'])]
+        my_mtg_domain = [
+            ('participant_ids', 'in', user.id),
+            ('meeting_datetime', '>=', today),
+            ('meeting_datetime', '<', today + timedelta(days=1))
+        ]
+
         my_work = {
-            'requests': self.env['analysis.request'].search_count([('analyst_ids', 'in', user.id), ('state', 'not in', ['completed', 'closed', 'rejected'])]),
-            'actions': self.env['analysis.action.item'].search_count([('owner_id', '=', user.id), ('state', '=', 'open')]),
-            'deliverables': self.env['analysis.deliverable'].search_count([('analyst_ids', 'in', user.id), ('state', 'in', ['draft', 'in_progress'])]),
-            'meetings': self.env['analysis.meeting'].search_count([
-                ('meeting_datetime', '>=', today),
-                ('meeting_datetime', '<', today + timedelta(days=1)),
-                ('participant_ids', 'in', user.id)
-            ]),
+            'requests': self.env['analysis.request'].search_count(my_req_domain),
+            'actions': self.env['analysis.action.item'].search_count(my_act_domain),
+            'deliverables': self.env['analysis.deliverable'].search_count(my_del_domain),
+            'meetings': self.env['analysis.meeting'].search_count(my_mtg_domain),
         }
 
         return {
@@ -116,4 +127,76 @@ class AnalysisDashboard(models.AbstractModel):
                 'deliverables': deliv_summary,
             },
             'my_work': my_work,
+            'change_requests': {
+                'total_open': len(open_crs),
+                'pending_impact': pending_impact_crs,
+                'pending_approval': pending_approval_crs,
+                'total_cost': total_cr_cost,
+            },
+            'domains': {
+                'my_requests': my_req_domain,
+                'my_actions': my_act_domain,
+                'my_deliverables': my_del_domain,
+                'my_meetings': my_mtg_domain,
+            },
+            'charts': {
+                'type_distribution': self._get_type_distribution(),
+                'monthly_velocity': self._get_monthly_velocity(),
+            }
         }
+
+    def _get_type_distribution(self):
+        """Aggregate counts by Request Type for the Pie Chart"""
+        query = """
+            SELECT request_type, count(*) 
+            FROM analysis_request 
+            GROUP BY request_type
+        """
+        self.env.cr.execute(query)
+        res = self.env.cr.fetchall()
+        
+        selection_map = dict(self.env['analysis.request']._fields['request_type'].selection)
+        labels = []
+        data = []
+        for r_type, count in res:
+            labels.append(selection_map.get(r_type, r_type))
+            data.append(count)
+        
+        return {'labels': labels, 'data': data}
+
+    def _get_monthly_velocity(self):
+        """Aggregate counts by creation calendar month for the Velocity Chart"""
+        labels = []
+        data = []
+        today = date.today()
+        
+        # Get start of current month
+        current_iter = today.replace(day=1)
+        
+        # Collect last 6 months
+        for i in range(6):
+            month_label = current_iter.strftime('%b %Y')
+            
+            # Start and end of the specific calendar month
+            start_month = current_iter
+            if current_iter.month == 12:
+                end_month = current_iter.replace(year=current_iter.year + 1, month=1)
+            else:
+                end_month = current_iter.replace(month=current_iter.month + 1)
+                
+            count = self.env['analysis.request'].search_count([
+                ('create_date', '>=', fields.Datetime.to_string(start_month)),
+                ('create_date', '<', fields.Datetime.to_string(end_month))
+            ])
+            
+            # Insert at beginning to keep chronological order
+            labels.insert(0, month_label)
+            data.insert(0, count)
+            
+            # Move back 1 month
+            if current_iter.month == 1:
+                current_iter = current_iter.replace(year=current_iter.year - 1, month=12)
+            else:
+                current_iter = current_iter.replace(month=current_iter.month - 1)
+            
+        return {'labels': labels, 'data': data}

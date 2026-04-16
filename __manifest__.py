@@ -10,7 +10,7 @@ Core module for managing business analysis requests, tracking status, and overse
 
     'author': "Rasheed Ali Al-Dhaferi",
     'category': 'Operations/Analysis',
-    'version': '18.0.1.0.0',
+    'version': '18.0.1.1.0',
 
     # any module necessary for this one to work correctly
     'depends': ['base', 'mail', 'project'],

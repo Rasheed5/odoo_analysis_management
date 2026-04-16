@@ -1,7 +1,10 @@
 .o_dashboard_container {
-    background-color: #f8f9fa;
-    min-height: 100vh;
-    font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--o-view-background, #f8f9fa);
+    color: var(--managed-view-text, #212529);
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    font-family: inherit;
 
     .o_dashboard_card {
         transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -16,7 +19,18 @@
     .kpi-card-red { border-left: 4px solid #dc3545; }
     .kpi-card-purple { border-left: 4px solid #6f42c1; }
     .kpi-card-teal { border-left: 4px solid #20c997; }
+    .kpi-card-orange { border-left: 4px solid #fd7e14; }
+    .kpi-card-green { border-left: 4px solid #28a745; }
 
+    canvas {
+        max-width: 100% !important;
+        height: 100% !important;
+    }
+
+    .rounded-top-4 {
+        border-top-left-radius: 1rem !important;
+        border-top-right-radius: 1rem !important;
+    }
     .status-pill {
         transition: background-color 0.2s;
         min-width: 100px;
@@ -25,10 +39,11 @@
         }
     }
 
-    .my-work-card {
+    .my_work_card {
         transition: background-color 0.2s;
+        background-color: var(--o-view-background, #fff);
         &:hover {
-            background-color: #f1f3f5 !important;
+            background-color: rgba(var(--bs-primary-rgb), 0.05) !important;
         }
     }
 
