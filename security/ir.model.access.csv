@@ -23,9 +23,9 @@ access_analysis_requirement_readonly,analysis_requirement.readonly,model_analysi
 access_analysis_requirement_user,analysis_requirement.user,model_analysis_requirement,group_analysis_user,1,1,1,1
 access_analysis_requirement_manager,analysis_requirement.manager,model_analysis_requirement,group_analysis_manager,1,1,1,1
 
-access_analysis_tag_readonly,analysis_tag.readonly,analysis_management.model_analysis_tag,base.group_user,1,0,0,0
-access_analysis_tag_user,analysis_tag.user,analysis_management.model_analysis_tag,group_analysis_user,1,1,1,1
-access_analysis_tag_manager,analysis_tag.manager,analysis_management.model_analysis_tag,group_analysis_manager,1,1,1,1
+access_analysis_tag_readonly,analysis_tag.readonly,model_analysis_tag,base.group_user,1,0,0,0
+access_analysis_tag_user,analysis_tag.user,model_analysis_tag,group_analysis_user,1,1,1,1
+access_analysis_tag_manager,analysis_tag.manager,model_analysis_tag,group_analysis_manager,1,1,1,1
 
 access_analysis_change_request_readonly,analysis_change_request.readonly,model_analysis_change_request,base.group_user,1,0,0,0
 access_analysis_change_request_user,analysis_change_request.user,model_analysis_change_request,group_analysis_user,1,1,1,0
