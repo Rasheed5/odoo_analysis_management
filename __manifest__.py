@@ -45,8 +45,7 @@ Core module for managing business analysis requests, tracking status, and overse
         ],
     },
     # only loaded in demonstration mode
-    'demo': [
-    ],
+    'demo': [],
     'application': True,
     'installable': True,
     'license': 'LGPL-3',

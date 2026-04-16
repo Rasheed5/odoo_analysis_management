@@ -4,13 +4,12 @@ import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { Component, onWillStart, useState, onMounted, onWillUnmount, useRef } from "@odoo/owl";
 import { loadJS } from "@web/core/assets";
-
-import { session } from "@web/session";
+import { user } from "@web/core/user";
 
 /**
  * AnalysisDashboard Component
- * This is the main landing page for the Analysis Management module.
- * It uses the OWL framework to provide a reactive, real-time cockpit.
+ * Main landing page for the Analysis Management module.
+ * Uses OWL framework to provide a reactive, real-time cockpit.
  */
 export class AnalysisDashboard extends Component {
     setup() {
@@ -22,23 +21,22 @@ export class AnalysisDashboard extends Component {
         this.typeChartRef = useRef("typeChart");
         this.velocityChartRef = useRef("velocityChart");
         this.charts = []; // Track chart instances for cleanup
-        
-        // Multi-fallback User ID retrieval for robustness across Odoo 18 configurations
-        this.userId = session.user_id || session.uid || (this.env.session && this.env.session.uid) || 0;
-        
+
         // Initialize reactive state for dashboard metrics
         this.state = useState({
-            userId: session.user_id || session.uid || (this.env.session && this.env.session.uid) || 0,
             data: {
-                kpis: {},
+                kpis: { open_requests: 0, overdue_requests: 0, pending_review_deliverables: 0, meetings_today: 0 },
                 pipeline: [],
                 workload: [],
-                risks: {},
+                risks: { today_blockers: 0, waiting_requests: 0, escalated_actions: 0 },
                 snapshot: { requirements: {}, deliverables: {} },
-                my_work: {},
-                change_requests: { total_open: 0, total_cost: 0 },
+                my_work: { requests: 0, actions: 0, deliverables: 0, meetings: 0 },
+                change_requests: { total_open: 0, pending_impact: 0, pending_approval: 0, total_cost: 0 },
                 domains: {},
-                charts: { type_distribution: { labels: [], data: [] }, monthly_velocity: { labels: [], data: [] } },
+                charts: {
+                    type_distribution: { labels: [], data: [] },
+                    monthly_velocity: { labels: [], data: [] }
+                },
             },
             loading: true,
         });
@@ -50,8 +48,11 @@ export class AnalysisDashboard extends Component {
 
         // Render charts after component is mounted and data is available
         onMounted(async () => {
-            // Ensure Chart.js is loaded before trying to use 'Chart' constructor
-            await loadJS("/web/static/lib/Chart/Chart.js");
+            try {
+                await loadJS("/web/static/lib/Chart/Chart.js");
+            } catch (_e) {
+                // Chart.js may already be loaded or path differs — ignore and try rendering
+            }
             this.renderCharts();
         });
 
@@ -63,12 +64,16 @@ export class AnalysisDashboard extends Component {
 
     renderCharts() {
         if (!this.state.data.charts) return;
+        if (typeof Chart === "undefined") {
+            console.warn("Dashboard: Chart.js not available, skipping chart rendering.");
+            return;
+        }
 
         // Ensure we don't double-render if already initialized
         this.charts.forEach(chart => chart.destroy());
         this.charts = [];
 
-        // 1. Request Type Distribution (Pie Chart)
+        // 1. Request Type Distribution (Doughnut Chart)
         const typeCtx = this.typeChartRef.el;
         if (typeCtx) {
             const chart = new Chart(typeCtx, {
@@ -78,8 +83,8 @@ export class AnalysisDashboard extends Component {
                     datasets: [{
                         data: this.state.data.charts.type_distribution.data,
                         backgroundColor: [
-                            '#007bff', '#28a745', '#ffc107', '#dc3545', 
-                            '#6f42c1', '#e83e8c', '#fd7e14', '#20c997', 
+                            '#007bff', '#28a745', '#ffc107', '#dc3545',
+                            '#6f42c1', '#e83e8c', '#fd7e14', '#20c997',
                             '#17a2b8', '#6610f2'
                         ],
                         borderWidth: 0
@@ -133,8 +138,11 @@ export class AnalysisDashboard extends Component {
             const data = await this.orm.call("analysis.dashboard", "get_dashboard_data", []);
             if (data) {
                 this.state.data = data;
-                // Force a safe fallback for financial total if backend returns null
-                if (this.state.data.change_requests && this.state.data.change_requests.total_cost === undefined) {
+                // Safe fallback for financial total if backend returns null/undefined
+                if (!this.state.data.change_requests) {
+                    this.state.data.change_requests = { total_open: 0, pending_impact: 0, pending_approval: 0, total_cost: 0 };
+                }
+                if (this.state.data.change_requests.total_cost == null) {
                     this.state.data.change_requests.total_cost = 0;
                 }
             } else {
@@ -142,7 +150,6 @@ export class AnalysisDashboard extends Component {
             }
         } catch (error) {
             console.error("Dashboard CRITICAL ERROR: Failed to load data from backend.", error);
-            // We keep the loading=false so the dashboard still shows (with 0s) rather than a stuck spinner
         } finally {
             this.state.loading = false;
         }
@@ -150,8 +157,7 @@ export class AnalysisDashboard extends Component {
 
     /**
      * Failsafe Domain Sanitizer:
-     * In Odoo 18, the SearchModel crashes with "reading 'toString'" if any domain value is undefined.
-     * This method ensures all conditions are valid types.
+     * Ensures all domain conditions are valid types before passing to Odoo's SearchModel.
      */
     _sanitizeDomain(domain) {
         if (!Array.isArray(domain)) return domain;
@@ -185,9 +191,5 @@ export class AnalysisDashboard extends Component {
 
 AnalysisDashboard.template = "analysis_management.AnalysisDashboard";
 
-console.log("Analysis Management Dashboard JS Loading...");
-
 // Explicitly register the client action
 registry.category("actions").add("analysis_management.dashboard", AnalysisDashboard);
-
-console.log("Analysis Management Dashboard Action Registered.");
