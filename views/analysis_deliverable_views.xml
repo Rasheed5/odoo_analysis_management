@@ -84,11 +84,11 @@
                 <header>
                     <button name="action_start_drafting" string="Start Drafting" type="object" class="oe_highlight" invisible="state != 'draft'"/>
                     <button name="action_submit_review" string="Submit for Review" type="object" class="oe_highlight" invisible="state not in ['in_progress', 'review_feedback']"/>
-                    <button name="action_send_back" string="Send Back for Revision" type="object" invisible="state != 'pending_review'" groups="group_analysis_reviewer,group_analysis_manager"/>
-                    <button name="action_approve" string="Approve" type="object" class="oe_highlight" invisible="state != 'pending_review'" groups="group_analysis_reviewer,group_analysis_manager"/>
-                    <button name="action_reject" string="Reject" type="object" invisible="state != 'pending_review'" groups="group_analysis_reviewer,group_analysis_manager"/>
-                    <button name="action_finalize" string="Finalize" type="object" class="oe_highlight" invisible="state != 'approved'" groups="group_analysis_manager"/>
-                    <button name="action_reset_to_draft" string="Reset to Draft" type="object" invisible="state == 'draft'" groups="group_analysis_manager"/>
+                    <button name="action_send_back" string="Send Back for Revision" type="object" invisible="state != 'pending_review'" groups="analysis_management.group_analysis_reviewer,analysis_management.group_analysis_manager"/>
+                    <button name="action_approve" string="Approve" type="object" class="oe_highlight" invisible="state != 'pending_review'" groups="analysis_management.group_analysis_reviewer,analysis_management.group_analysis_manager"/>
+                    <button name="action_reject" string="Reject" type="object" invisible="state != 'pending_review'" groups="analysis_management.group_analysis_reviewer,analysis_management.group_analysis_manager"/>
+                    <button name="action_finalize" string="Finalize" type="object" class="oe_highlight" invisible="state != 'approved'" groups="analysis_management.group_analysis_manager"/>
+                    <button name="action_reset_to_draft" string="Reset to Draft" type="object" invisible="state == 'draft'" groups="analysis_management.group_analysis_manager"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,in_progress,pending_review,approved,finalized"/>
                 </header>
                 <sheet>

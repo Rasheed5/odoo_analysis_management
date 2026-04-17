@@ -102,7 +102,7 @@
     <menuitem id="menu_analysis_action_item" name="Action Items" parent="menu_analysis_requests_main" action="action_analysis_action_item" sequence="40"/>
 
     <!-- Configuration Menu -->
-    <menuitem id="menu_analysis_config" name="Configuration" parent="menu_analysis_management_root" sequence="100" groups="group_analysis_manager"/>
+    <menuitem id="menu_analysis_config" name="Configuration" parent="menu_analysis_management_root" sequence="100" groups="analysis_management.group_analysis_manager"/>
     <menuitem id="menu_analysis_tag" name="Tags" parent="menu_analysis_config" action="action_analysis_tag" sequence="10"/>
 
 </odoo>
